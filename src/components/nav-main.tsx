@@ -1,22 +1,22 @@
-import { IconCirclePlusFilled, IconMail, type Icon } from "@tabler/icons-react"
-
-import { Button } from "@/components/ui/button"
+import { IconCirclePlusFilled, IconMail, type Icon } from "@tabler/icons-react";
+import { Button } from "@/components/ui/button";
 import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
+import { Link } from "react-router-dom";
 
 export function NavMain({
   items,
 }: {
   items: {
-    title: string
-    url: string
-    icon?: Icon
-  }[]
+    title: string;
+    url: string;
+    icon?: Icon;
+  }[];
 }) {
   return (
     <SidebarGroup>
@@ -43,14 +43,16 @@ export function NavMain({
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton tooltip={item.title}>
-                {item.icon && <item.icon />}
-                <span>{item.title}</span>
-              </SidebarMenuButton>
+              <Link to={item.url}>
+                <SidebarMenuButton tooltip={item.title}>
+                  {item.icon && <item.icon />}
+                  <span>{item.title}</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
-  )
+  );
 }
