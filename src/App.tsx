@@ -3,7 +3,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import Dashboard from "@/app/dashboard/dashboard";
-import Projects from "@/app/projects/projects";
+import Advertisements from "@/app/Advertisements/Advertisements";
 import { Routes, Route } from "react-router-dom";
 function App() {
   return (
@@ -15,7 +15,7 @@ function App() {
           <div className="flex flex-1 flex-col">
             <Routes>
               <Route path="/" element={<Dashboard />} />
-              <Route path="/projects" element={<Projects />} />
+              <Route path="/advertisements" element={<Advertisements />} />
             </Routes>
           </div>
         </SidebarInset>
