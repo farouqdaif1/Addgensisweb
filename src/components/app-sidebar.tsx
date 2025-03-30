@@ -30,7 +30,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useState } from "react";
 
 const data = {
   user: {
