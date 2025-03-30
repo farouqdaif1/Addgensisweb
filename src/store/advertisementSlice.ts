@@ -29,11 +29,11 @@ const advertisementSlice = createSlice({
         addAdvertisement: (state, action: PayloadAction<Advertisement>) => {
             state.advertisements.push(action.payload);
         },
-        createFacebookAd: (state, action: PayloadAction<string>) => {
+        createFacebookAd: (_state, action: PayloadAction<string>) => {
             const postId = action.payload;
             console.log(`Creating Facebook ad for post: ${postId}`);
         },
-        enhanceWithAI: (state, action: PayloadAction<string>) => {
+        enhanceWithAI: (_state, action: PayloadAction<string>) => {
             const postId = action.payload;
             console.log(`Enhancing post with AI: ${postId}`);
         },
