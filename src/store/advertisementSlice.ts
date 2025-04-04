@@ -29,6 +29,12 @@ const advertisementSlice = createSlice({
         addAdvertisement: (state, action: PayloadAction<Advertisement>) => {
             state.advertisements.push(action.payload);
         },
+        updateAdvertisement: (state, action: PayloadAction<Advertisement>) => {
+            const index = state.advertisements.findIndex(ad => ad.id === action.payload.id);
+            if (index !== -1) {
+                state.advertisements[index] = action.payload;
+            }
+        },
         createFacebookAd: (_state, action: PayloadAction<string>) => {
             const postId = action.payload;
             console.log(`Creating Facebook ad for post: ${postId}`);
@@ -46,5 +52,5 @@ const advertisementSlice = createSlice({
     },
 });
 
-export const { addAdvertisement, createFacebookAd, enhanceWithAI, setRecentPhoto, deleteAdvertisement } = advertisementSlice.actions;
+export const { addAdvertisement, updateAdvertisement, createFacebookAd, enhanceWithAI, setRecentPhoto, deleteAdvertisement } = advertisementSlice.actions;
 export default advertisementSlice.reducer;

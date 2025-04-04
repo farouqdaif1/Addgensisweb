@@ -14,8 +14,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useRef, useState } from "react";
-import { addAdvertisement } from "@/store/advertisementSlice";
+import { useRef, useState, useEffect } from "react";
+import {
+  addAdvertisement,
+  updateAdvertisement,
+} from "@/store/advertisementSlice";
 import { useDispatch } from "react-redux";
 
 const formSchema = z.object({
@@ -25,7 +28,23 @@ const formSchema = z.object({
   images: z.array(z.instanceof(File)),
 });
 
-const FormComponent = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
+interface FormComponentProps {
+  setOpen: (open: boolean) => void;
+  advertisement?: {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    images: string[];
+  };
+  isEdit?: boolean;
+}
+
+const FormComponent = ({
+  setOpen,
+  advertisement,
+  isEdit = false,
+}: FormComponentProps) => {
   const dispatch = useDispatch();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -38,7 +57,21 @@ const FormComponent = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
   });
 
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Set form values when editing an existing advertisement
+  useEffect(() => {
+    if (advertisement && isEdit) {
+      form.reset({
+        name: advertisement.name,
+        description: advertisement.description,
+        price: advertisement.price.toString(),
+        images: [],
+      });
+      setExistingImages(advertisement.images);
+    }
+  }, [advertisement, form, isEdit]);
 
   const triggerFileInput = () => {
     if (fileInputRef.current) {
@@ -47,19 +80,33 @@ const FormComponent = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
   };
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    dispatch(
-      addAdvertisement({
-        id: Math.random().toString(),
-        name: values.name,
-        description: values.description,
-        price: parseFloat(values.price),
-        images: selectedImages.map((image) => URL.createObjectURL(image)),
-      })
-    );
+    if (isEdit && advertisement) {
+      // Update existing advertisement
+      dispatch(
+        updateAdvertisement({
+          id: advertisement.id,
+          name: values.name,
+          description: values.description,
+          price: parseFloat(values.price),
+          images: existingImages,
+        })
+      );
+    } else {
+      // Create new advertisement
+      dispatch(
+        addAdvertisement({
+          id: Math.random().toString(),
+          name: values.name,
+          description: values.description,
+          price: parseFloat(values.price),
+          images: selectedImages.map((image) => URL.createObjectURL(image)),
+        })
+      );
+    }
     setOpen(false);
     form.reset();
     setSelectedImages([]);
-    console.log(values);
+    setExistingImages([]);
   }
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,11 +120,17 @@ const FormComponent = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
     );
   };
 
+  const removeExistingImage = (index: number) => {
+    setExistingImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleCancel = () => {
     setOpen(false);
     form.reset();
     setSelectedImages([]);
+    setExistingImages([]);
   };
+
   return (
     <div className="w-[460px]">
       <Form {...form}>
@@ -153,20 +206,51 @@ const FormComponent = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
 
           <label htmlFor="image-upload">
             <Button
-              onClick={triggerFileInput} // Add click event
+              onClick={triggerFileInput}
               type="button"
               className="w-full bg-[#ffd43b] hover:bg-[#ffc107] text-black font-semibold h-10 text-xl"
             >
               <ImageIcon className="mr-2 h-5 w-5" /> Select Images
             </Button>
           </label>
+
+          {/* Display existing images when editing */}
+          {isEdit && existingImages.length > 0 && (
+            <div className="h-[180px] p-4 w-full overflow-x-auto">
+              <div className="flex flex-row gap-2 w-[100%] scrollbar-auto">
+                {existingImages.map((image, index) => (
+                  <div
+                    key={index}
+                    className="relative rounded-lg aspect-square w-[150px] h-[150px]"
+                  >
+                    <img
+                      src={image}
+                      alt={`Existing image ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="destructive"
+                      className="absolute top-1 right-1 h-6 w-6 rounded-full p-0"
+                      onClick={() => removeExistingImage(index)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Display newly selected images */}
           {selectedImages.length > 0 && (
             <div className="h-[180px] p-4 w-full overflow-x-auto">
               <div className="flex flex-row gap-2 w-[100%] scrollbar-auto">
                 {selectedImages.map((image, index) => (
                   <div
                     key={index}
-                    className="relative rounded-lg  aspect-square w-[150px] h-[150px]"
+                    className="relative rounded-lg aspect-square w-[150px] h-[150px]"
                   >
                     <img
                       src={URL.createObjectURL(image)}
@@ -193,7 +277,7 @@ const FormComponent = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
               type="submit"
               className="w-full bg-[#ffd43b] hover:bg-[#ffc107] text-black font-semibold h-10 text-xl"
             >
-              Create Advertisement
+              {isEdit ? "Update Advertisement" : "Create Advertisement"}
             </Button>
             <Button
               type="button"
